@@ -10,6 +10,7 @@ from hairstyler import views
 
 
 MODULE_DIR = os.path.dirname(__file__)
+print(MODULE_DIR)
 featured_hairstyles_repository = FeaturedHairstylesDB(
     MODULE_DIR + "/../data/database.sqlite"
 )
