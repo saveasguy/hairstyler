@@ -1,0 +1,14 @@
+image: tensorflow/tensorflow:latest
+
+before_script:
+  - apt-get update
+  - apt-get install ffmpeg libsm6 libxext6 -y
+  - python -m pip install --upgrade pip
+  - pip install -r requirements.txt
+
+tests:
+  stage: test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+  script:
+    - python -m unittest discover -v
