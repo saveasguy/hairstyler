@@ -9,6 +9,6 @@ before_script:
 tests:
   stage: test
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
     - python -m unittest discover -v
