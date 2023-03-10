@@ -8,7 +8,5 @@ before_script:
 
 tests:
   stage: test
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
   script:
     - python -m unittest discover -v
