@@ -1,4 +1,4 @@
-# Hairstyle Recommendation App
+# Hairstyle Recommendation App 20203.11
 ## About
 Hairstyle Recommendation App is a separate service which takes image of client, applies pipeline of recommandation algorithms and returns recommendation scores for each hairstyle.
 
