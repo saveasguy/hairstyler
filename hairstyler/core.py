@@ -24,7 +24,10 @@ class IAIRepository:
 
 
 class IDatabaseRepository:
-    def filter_by_value(self, value: str) -> List[str]:
+    def get_featured_hairstyles(self, feature: str) -> List[str]:
+        raise NotImplementedError
+
+    def get_hairstyle_image(self, hairstyle: str) -> str:
         raise NotImplementedError
 
 
@@ -77,13 +80,11 @@ class FaceShapeInteractor(IInteractor):
 class HairstyleRecommendationInteractor(IInteractor):
     def __init__(
         self,
-        featured_hairstyles_repository: IDatabaseRepository,
-        hairstyle_images_repository: IDatabaseRepository,
+        db: IDatabaseRepository,
         face_recognizer_repository: IAIRepository,
         face_shape_classifier_repository: IAIRepository,
     ):
-        self._featured_hairstyles = featured_hairstyles_repository
-        self._hairstyle_images = hairstyle_images_repository
+        self._db = db
         self._recognizer_repository = face_recognizer_repository
         self._classifier_repository = face_shape_classifier_repository
 
@@ -94,9 +95,7 @@ class HairstyleRecommendationInteractor(IInteractor):
         face_features = classifier(face_image)
         result = {}
         for feature, probability in face_features:
-            fitting_hairstyles = self._featured_hairstyles.filter_by_value(
-                feature
-            )
+            fitting_hairstyles = self._db.get_featured_hairstyles(feature)
             for hairstyle in fitting_hairstyles:
                 if not hairstyle in result:
                     result[hairstyle] = probability
@@ -105,7 +104,7 @@ class HairstyleRecommendationInteractor(IInteractor):
         labeled_probabilities = [
             HairstyleRecommendation(
                 hairstyle,
-                self._hairstyle_images.filter_by_value(hairstyle)[0],
+                self._db.get_hairstyle_image(hairstyle),
                 probability,
             )
             for hairstyle, probability in result.items()

@@ -66,6 +66,7 @@ class RecommendationView(ImageHandlerView):
                     "probability": str(probability),
                 }
             )
+        print(json_response)
         return jsonify(json_response)
 
 

@@ -3,31 +3,27 @@
 Hairstyle Recommendation App is a separate service which takes image of client, applies pipeline of recommandation algorithms and returns recommendation scores for each hairstyle.
 
 ## Installation
-* Conda (https://docs.conda.io/en/latest/miniconda.html)
-* Tensorflow (https://www.tensorflow.org/install/pip)
-* Python packages
-  * `pip install tensorflow-gpu`
-  * `pip install pillow opencv-python numpy`
-* (optional) Nvidia GPU support
-  * CUDA 11.2 (https://developer.nvidia.com/cuda-toolkit-archive)
-  * cuDNN 8.1 (https://developer.nvidia.com/rdp/cudnn-download)
-* Flask: `pip install flask flask-cors`
+### Local
+* Install Redis(https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/).
+* Install python3 requirements: `pip3 install -r requrements.txt`.
 
-### Docker (recommended)
-* Docker (https://docs.docker.com/engine/install/ubuntu/)
-* (optional) nvidia-docker2 (https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
-* tensorflow for Docker (https://www.tensorflow.org/install/docker)
-* Build dev-server application: `DOCKER_BUILDKIT=1 docker build -t hairstyler-dev -f Dockerfile.dev .`
-  * (optional) Build dev-server-application with GPU support: `DOCKER_BUILDKIT=1 docker build -t hairstyler-gpu-dev -f Dockerfile.gpu.dev .`
-* Build tests: `DOCKER_BUILDKIT=1 docker build -t hairstyler-tests -f Dockerfile.tests .`
-  * (optional) Build tests with GPU support: `DOCKER_BUILDKIT=1 docker build -t hairstyler-gpu-tests -f Dockerfile.gpu.tests .`
+### Minikube (recommended)
+* Install Docker (https://docs.docker.com/engine/install/ubuntu/).
+* Install Minikube (https://minikube.sigs.k8s.io/docs/start/?arch=%2Flinux%2Fx86-64%2Fstable%2Fbinary+download).
+* Build dev-server application: `docker build -t hairstyler .`
 
 ## Running
-To run dev-server application execute following command: `flask --app hairstyler run --cert=certificates/cert.pem --key=certificates/key.pem --host=0.0.0.0`.   
-To run unit tests execute: `python -m unittest discover -v`.
+### Local
+* To run dev-server application execute the following command: `flask --app hairstyler run --cert=certificates/cert.pem --key=certificates/key.pem --host=0.0.0.0`.   
+* To run unit tests execute: `python3 -m unittest discover -v`.
+* Check how API works by playing around with `https://127.0.0.1:5000/docs` in your browser.
 
-### Docker (recommended)
-* To run dev-server application execute following command: `docker run -p 5000:5000 hairstyler-dev`
-  * (optional) To run dev-server with GPU support execute: `docker run --gpus all -p 5000:5000 hairstyler-gpu-dev`
-* To run unit tests execute: `docker run hairstyler-tests`
-  * (optional) To run unit tests with GPU support execute: `docker run --gpus all hairstyler-gpu-tests`
+### Minikube (recommended)
+* Run Minikube: `minikube start`
+* Apply k8s config and start the application: `kubectl apply -f ./configs/k8s.yaml`
+* To run unit tests execute: `kubectl exec --stdin --tty hairstyler -- python3 -m unittest discover -v`
+* Check IP of Minikube by running: `minikube ip`.
+* Check how API works by playing around with `https://<minikube-ip>:30500/docs` in your browser.
+
+#### Troubleshooting
+* Point minikube to docker-daemon: `eval $(minikube -p minikube docker-env)`
