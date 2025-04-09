@@ -5,17 +5,14 @@ from flask_cors import CORS
 
 from hairstyler import ai
 from hairstyler import core
-from hairstyler.hairstyles import FeaturedHairstylesDB, HairstyleImagesDB
+from hairstyler.hairstyles import RedisDB
 from hairstyler import views
 
 
 MODULE_DIR = os.path.dirname(__file__)
-featured_hairstyles_repository = FeaturedHairstylesDB(
-    MODULE_DIR + "/../data/database.sqlite"
-)
-hairstyle_images_repository = HairstyleImagesDB(
-    MODULE_DIR + "/../data/database.sqlite"
-)
+REDIS_HOST = os.getenv("REDIS_SERVICE_HOST", "localhost")
+REDIS_PORT = int(os.getenv("REDIS_SERVICE_PORT", 6379))
+db_repository = RedisDB(REDIS_HOST, REDIS_PORT, MODULE_DIR + "/../data/hairstyles_data.json") 
 face_recognizer_repository = ai.FaceRecognizerRepository(
     MODULE_DIR + "/../ai/haarcascade_frontalface_default.xml"
 )
@@ -27,8 +24,7 @@ face_shape_interactor = core.FaceShapeInteractor(
     face_recognizer_repository, face_shape_classifier_repository
 )
 recommendation_interactor = core.HairstyleRecommendationInteractor(
-    featured_hairstyles_repository,
-    hairstyle_images_repository,
+    db_repository,
     face_recognizer_repository,
     face_shape_classifier_repository,
 )

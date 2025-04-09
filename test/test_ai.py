@@ -15,15 +15,13 @@ class MockJSONHairstylesRepository(core.IDatabaseRepository):
         with open(json_path, encoding="utf-8") as json_file:
             self._hairstyles = json.load(json_file)
 
-    def filter_by_value(self, feature: str) -> List[str]:
+    def get_featured_hairstyles(self, feature: str) -> List[str]:
         if not feature in self._hairstyles:
             raise ValueError(f"'{feature}' feature doesn't exist!")
         return self._hairstyles[feature]
 
-
-class MockHairstyleImageRepository(core.IDatabaseRepository):
-    def filter_by_value(self, value: str) -> List[str]:
-        return ["img",]
+    def get_hairstyle_image(self, hairstyle: str) -> str:
+        return "img"
 
 
 class TestAI(unittest.TestCase):
@@ -42,7 +40,6 @@ class TestAI(unittest.TestCase):
         self.hairstyles_repo = MockJSONHairstylesRepository(
             module_dir + "/hairstyles_files/fake_hairstyles.json"
         )
-        self.hairstyle_images_repo = MockHairstyleImageRepository()
 
     def test_image_recognition(self):
         face_recognizer = self.face_recognizer_repo.get()
@@ -71,7 +68,6 @@ class TestAI(unittest.TestCase):
     def test_hairstyle_recommendation(self):
         interactor = core.HairstyleRecommendationInteractor(
             self.hairstyles_repo,
-            self.hairstyle_images_repo,
             self.face_recognizer_repo,
             self.face_shape_classifier_repo,
         )

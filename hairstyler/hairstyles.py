@@ -1,6 +1,8 @@
+import json
+import pathlib
 from typing import List
 
-import sqlite3
+import redis
 
 from hairstyler import core
 
@@ -9,54 +11,18 @@ class DatabaseFetchError(Exception):
     pass
 
 
-class FeaturedHairstylesDB(core.IDatabaseRepository):
-    def __init__(self, db_path: str):
-        connection = sqlite3.connect(db_path)
-        cursor = connection.cursor()
-        result = cursor.execute(
-            """
-            SELECT feature.name, hairstyle.name FROM match
-            JOIN feature ON match.feature_id = feature.id
-            JOIN hairstyle ON match.hairstyle_id = hairstyle.id
-        """
-        )
-        if result is None:
-            raise DatabaseFetchError(f"Failed to fetch database {db_path}")
-        self._distributed_hairstyles = {}
-        for feature, hairstyle in result:
-            if not feature in self._distributed_hairstyles:
-                self._distributed_hairstyles[feature] = [
-                    hairstyle,
-                ]
-            else:
-                self._distributed_hairstyles[feature].append(hairstyle)
+class RedisDB(core.IDatabaseRepository):
+    def __init__(self, host: str, port: int, hairstlye_data: pathlib.Path):
+        self._db = redis.Redis(host=host, port=port)
+        with open(hairstlye_data) as json_data:
+            hairstyles_data = json.load(json_data)
+        for feature, hairstyles in hairstyles_data["featured_hairstyles"].items():
+            self._db.lpush(feature, *hairstyles)
+        for hairstyle, image in hairstyles_data["hairstyle_images"].items():
+            self._db.set(hairstyle, image)
 
-    def filter_by_value(self, value: str) -> List[str]:
-        if not value in self._distributed_hairstyles:
-            raise ValueError(f"'{value}' feature doesn't exist!")
-        return self._distributed_hairstyles[value]
+    def get_featured_hairstyles(self, feature: str) -> List[str]:
+        return [result.decode("utf-8") for result in self._db.lrange(feature, 0, -1)]
 
-
-class HairstyleImagesDB(core.IDatabaseRepository):
-    def __init__(self, db_path: str):
-        connection = sqlite3.connect(db_path)
-        cursor = connection.cursor()
-        result = cursor.execute(
-            """
-            SELECT hairstyle.name, hairstyle_image.base64_image FROM hairstyle
-            JOIN hairstyle_image ON hairstyle_image.hairstyle_id = hairstyle.id
-        """
-        )
-        if result is None:
-            raise DatabaseFetchError(f"Failed to fetch database {db_path}")
-        self._hairstyle_images = {}
-        for hairstyle, base64_image in result:
-            if not hairstyle in self._hairstyle_images:
-                self._hairstyle_images[hairstyle] = [
-                    base64_image,
-                ]
-
-    def filter_by_value(self, value: str) -> List[str]:
-        if not value in self._hairstyle_images:
-            raise ValueError(f"'{value}' hairstyle doesn't exist!")
-        return self._hairstyle_images[value]
+    def get_hairstyle_image(self, hairstyle: str) -> str:
+        return self._db.get(hairstyle).decode("utf-8")
