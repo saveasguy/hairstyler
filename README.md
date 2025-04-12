@@ -4,7 +4,7 @@ Hairstyle Recommendation App is a separate service which takes image of client, 
 
 ## Installation
 ### Local
-* Install Redis(https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/).
+* Install Redis (https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/).
 * Install python3 requirements: `pip3 install -r requrements.txt`.
 
 ### Minikube (recommended)
